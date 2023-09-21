@@ -82,6 +82,10 @@ https://go.dev/dl/
 
 
 ## 도커 컨테이너 실행 ##
+- C:\docker> docker container run --help => 명령어 옵션 확인
 - **docker container run(권장) = docker run** 명령어 사용
 
 ![image](https://github.com/xodbs1123/Docker/assets/61976898/c227ce3e-9b23-4540-ad02-9aab2e4635bc)
+
+
+
