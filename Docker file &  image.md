@@ -183,3 +183,61 @@ https://www.cyberciti.biz/faq/explain-debian_frontend-apt-get-variable-for-ubunt
 
 ![image](https://github.com/xodbs1123/Docker/assets/61976898/32cda6bd-5934-4b70-ad09-56aa720397c7)
 
+- **빌더 패턴과 다단계 도커 빌드**
+- 빌더 패턴
+  - 최적 크기 도커 이미지를 생성하기 위해 사용하는 방법
+  - 두 개의 도커 이미지를 사용
+    - 첫 번째 도커 이미지 => Builder => 소스 코드를 실행 파일로 만들기 위한 빌드 환경 => 빌드에 필요한 컴파일러, 빌드 도구, 개발 종속성 등을 포함
+    - 두 번째 도커 이미지 => Runtime => 첫 번째 도커 컨테이너가 생성한 실행 파일을 실행하기 위한 런타임 환경 => 실행 파일, 종속성 및 런타임 도구만 포함
+    - **첫 번째 도커 컨테이너가 생성한 실행 파일을 두 번째 도커 컨테이너로 전달하는 스크립트가 필요**
+      
+![image](https://github.com/xodbs1123/Docker/assets/61976898/52ce56c8-325c-486c-84c0-f606ba419332)
+
+### 불필요한 내용을 포함하는 예시 ###
+- Go 컴파일러는 애플리케이션을 빌드할 때 필요하지만 실행할 때는 필요하지 않음
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/dc0bb3aa-8425-48a0-ae2a-5a57f31a3412)
+
+- C:\docker\build-pattern\helloworld.go
+  
+![image](https://github.com/xodbs1123/Docker/assets/61976898/1f39ac6a-0d5a-479e-8a60-3cb16b761bad)
+
+- 호스트에서 실행 파일을 생성해서 실행
+  
+![image](https://github.com/xodbs1123/Docker/assets/61976898/5db811ab-180b-4e64-92e6-d78a5ed953c3)
+
+- Dockerfile을 정의해서 이미지를 생성
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/37db9bb6-e3ea-496a-bb98-1e9ff712a5d3)
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/8156f41e-e4bc-4c46-a4c2-71f488e266b1)
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/2e9caa1c-1a60-49d3-8d11-294ab828ef09)
+
+### helloworld 이미지를 이용해서 실행한 컨테이너의 /myapp/helloworld 실행 파일을 호스트로 복사 ###
+
+- shell을 실행시켜서 dettach 모드로 전환
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/03bb8427-b70c-4925-bf9e-0c69eed8921a)
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/da62d0ec-cba7-4a58-aa6d-4bdacd1a38a3)
+
+[c:\docker\build-pattern\Dockerfile-runtime]
+![image](https://github.com/xodbs1123/Docker/assets/61976898/f5fc62a9-db1a-4155-9cd1-d5582101f8fb)
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/0587d71f-d2f0-47f5-a4f6-5322af2613ec)
+
+
+- c:\docker\build-pattern\Dockerfile-builder
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/4fd39a36-cef6-47c7-aea2-b9b04b05b180)
+
+- c:\docker\build-pattern\helloworld-builder.cmd
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/802cb86c-2b81-4ecf-b214-27740c9c1738)
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/e5cd0f54-f08e-498a-8d49-ff34aa37b269)
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/35bc770f-e813-4736-acfd-abfb534a229c)
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/91754a2a-1b54-41ba-ac6b-eea5e1477e46)
