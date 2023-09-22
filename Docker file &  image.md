@@ -1,3 +1,4 @@
+
 ## Dockerfile 작성 시 유의사항 1 ##
 
 - 사용자 입력이 발생하지 않도록 하고, 포그라운드 프로세스로 실행되도록 해야 함
@@ -223,6 +224,7 @@ https://www.cyberciti.biz/faq/explain-debian_frontend-apt-get-variable-for-ubunt
 ![image](https://github.com/xodbs1123/Docker/assets/61976898/da62d0ec-cba7-4a58-aa6d-4bdacd1a38a3)
 
 [c:\docker\build-pattern\Dockerfile-runtime]
+
 ![image](https://github.com/xodbs1123/Docker/assets/61976898/f5fc62a9-db1a-4155-9cd1-d5582101f8fb)
 
 ![image](https://github.com/xodbs1123/Docker/assets/61976898/0587d71f-d2f0-47f5-a4f6-5322af2613ec)
