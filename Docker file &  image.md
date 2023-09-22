@@ -227,7 +227,6 @@ https://www.cyberciti.biz/faq/explain-debian_frontend-apt-get-variable-for-ubunt
 
 ![image](https://github.com/xodbs1123/Docker/assets/61976898/0587d71f-d2f0-47f5-a4f6-5322af2613ec)
 
-
 - c:\docker\build-pattern\Dockerfile-builder
 
 ![image](https://github.com/xodbs1123/Docker/assets/61976898/4fd39a36-cef6-47c7-aea2-b9b04b05b180)
@@ -241,3 +240,64 @@ https://www.cyberciti.biz/faq/explain-debian_frontend-apt-get-variable-for-ubunt
 ![image](https://github.com/xodbs1123/Docker/assets/61976898/35bc770f-e813-4736-acfd-abfb534a229c)
 
 ![image](https://github.com/xodbs1123/Docker/assets/61976898/91754a2a-1b54-41ba-ac6b-eea5e1477e46)
+
+### 다단계 Docker 빌드 ###
+- Docker 17.05 버전에 새롭게 추가된 기능
+- 하나의 Dockerfile에 여러 개의 FROM 문을 사용해 빌드 단계를 정의하고, --from 플래그를 사용해 각 단계에서 생성된 아티팩트 참조가 가능하도록 하는 것
+- 각 단계는 0부터 순서대로 부여된 번호 또는 AS 절을 사용해 부여한 별칭을 이용할 수 있음
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/e51dda61-252b-4eab-b2c6-3cf543a5a6c2)
+
+
+[C:\docker\multi-state-build\helloworld.go]
+![image](https://github.com/xodbs1123/Docker/assets/61976898/cb4dabea-4993-4bbc-bbd6-5e8cf167264d)
+
+[C:\docker\multi-state-build\Dockerfile]
+![image](https://github.com/xodbs1123/Docker/assets/61976898/efff3fc0-075d-481e-a0e8-65f425a49ea6)
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/b4c7a1d9-62fa-4e04-b7a2-365575b9896d)
+
+### 가독성 향상을 위해 AS 절을 사용해 별칭을 부여 ###
+![image](https://github.com/xodbs1123/Docker/assets/61976898/5441ce3a-ee6b-459d-88fc-3d807e713859)
+
+### 이미지 빌드 시 --target 옵션을 이용해서 최종 단계 지정 가능 ###
+![image](https://github.com/xodbs1123/Docker/assets/61976898/3662fddb-24cb-49e4-9a2e-6c5c90937760)
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/33ff8b23-bc73-471e-8f31-62942a56d84b)
+
+## Dockerfile 모범 사례 ##
+- 도커 이미지 빌드 시간 단축, 이미지 크기 감소, 보안 강화 및 유지 관리 가능성 보장
+
+## 1. 적절한 베이스 이미지 사용 ##
+## 1-1. 도커 허브 공식 이미지 사용 ##
+- 도커 허브의 공식 이미지는 모범 사례를 따르고 문서화되어 있으며 보안 패치가 적용되어 있음
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/648652b8-0eb2-4f4d-8f29-f59a9fe2c5d7)
+
+### 1-2. 특정 버전의 태그 사용 ###
+- 프로덕션 환경을 위한 도커 이미지를 빌드할 때 베이스 이미지에 latest 태그를 사용하면 하위 호환성을 제공하지 않을 경우 문제가 될 수 있음
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/0b49f2f5-fa85-41a4-b3fe-aaaea152c106)
+
+### 1-3. 최소 크기의 이미지를 사용 ###
+- 최소 크기 버전의 부모 이미지(base image)를 사용 => 최소 크기의 도커 이미지를 만들 수 생성
+- alpine linux 이미지를 중심으로 빌드된 최소 크기 이미지 또는 빌드 도구가 포함된 JDK 대신 JRE를 사용하여 어플리케이션을 실행해야 함
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/cdcf3062-39cb-43cf-8225-aef8a79f2619)
+
+
+## 2. 루트가 아닌 사용자로 컨테이너 실행 ##
+- 도커 컨테이너는 기본적으로 루트(id=0) 사용자로 실행 => 해커가 도커 컨테이너 내부에서 실행되는 어플리케이션을 해킹한 후 도커 호스트에 대한 루트 액세스 권한을 획득할 수 있으므로, 프로덕션 환경에서는 루트 사용자로 도커 컨테이너를 실행하는 것은 나쁜 보안 관행으로 간주
+
+- 응용 프로그램 실행에 필요한 최소한 권한만 갖도록 최소 권한의 원칙을 주소
+
+### 2-1. --user (또는 -u) 옵션을 사용 ###
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/e8f90f94-32d7-4d8c-a6ba-5470d646646c)
+
+### 2-2. USER 지시문 사용 ###
+![image](https://github.com/xodbs1123/Docker/assets/61976898/24a6d938-e9ea-4cdb-b691-8aa1f3c1c8ca)
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/dfb39b24-200a-485c-9b0e-2c50dbd3e381)
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/b0d59879-cdc0-4e0b-9485-09469db1646d)
