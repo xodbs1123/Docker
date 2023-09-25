@@ -153,4 +153,5 @@
 ![image](https://github.com/xodbs1123/Docker/assets/61976898/2b6a2415-c27a-462f-891d-0909b0cc74d8)
 
 - 다시 myvolume:2.0 을 이미지 빌드하면 새로운 이미지로 생성됨 ( ID 바뀜 )
+
 ![image](https://github.com/xodbs1123/Docker/assets/61976898/5154a29c-1374-404f-b744-00c82b14361a)
