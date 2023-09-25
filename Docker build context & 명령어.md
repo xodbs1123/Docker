@@ -80,29 +80,9 @@
 
 
 ## VOLUME ##
-- 빌드된 이미지로 컨테이너를 생성했을 때 호스트와 공유할 컨테이너 내부의 디렉터리를 설정
-- 컨테이너에서 VOLUME을 사용하면 컨테이너를 실행할 때 -v 또는 --volume 옵션을 사용하여 호스트의 볼륨을 연결하거나 볼륨 컨테이너를 생성해 연결해줘야 함
-- VOLUME 명령을 사용하는 주요 목적
-  - 데이터 보존
-  - 데이터 공유
-  - 데이터 컨테이너와 애플리케이션 코드르 분리
-
-- c:\docker\volume\Dockerfile
-
-![image](https://github.com/xodbs1123/Docker/assets/61976898/a8af6eb8-0b43-4342-b9f3-706231d77ea1)
-
-- 이미지 빌드 & 컨테이너 실행 
-
-![image](https://github.com/xodbs1123/Docker/assets/61976898/4f03770d-9435-4516-a9a8-0d2d286cf260)
-
-- dockerfile 수정 (volume 추가)
-
-![image](https://github.com/xodbs1123/Docker/assets/61976898/178ebaa0-cb2c-4fad-a548-43f6af22dc2b)
-
-- 이미지 빌드 & 컨테이너 실행
-
-![image](https://github.com/xodbs1123/Docker/assets/61976898/5fb0ca79-1aaf-495f-b1a6-98ec6cf3ccbc)
-
+- 디렉터리의 내용을 컨테이너에 저장하지 않고 호스트에 저장하도록 설정
+- Union File System을 통하지 않고 호스트에 저장하므로, docker commit 명령으로 이미지를 생성해도 이미지에 변경 사항이 포함되지 않음
+- 호스트의 특정 디렉터리와는 연결할 수 없으며, 데이터 볼륨을 호스트의 특정 디렉터리와 연결하려면 docker container run 명령어의 -v 옵션을 사용해야 함
 
 ## -v 옵션 사용하여 volume 매핑 ##
 
