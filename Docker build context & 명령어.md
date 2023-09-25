@@ -191,6 +191,8 @@
 ### 방법 1. Container commit 명령으로 이미지를 작성 ###
 - nginx 이미지를 이용해서 컨테이너를 실행
 
+![image](https://github.com/xodbs1123/Docker/assets/61976898/5a1bc492-6840-474c-a31f-d03829def6e2)
+
 - nginx 기본 웹 루트 디렉터리 아래의 기본 웹 페이지(index.html)가 응답으로 제공되는 것을 확인
 
 ![image](https://github.com/xodbs1123/Docker/assets/61976898/9a6d373d-824f-406b-a3f2-ab572f97a90d)
