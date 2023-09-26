@@ -434,4 +434,300 @@ done
 
 ### 첫번째 컨테이너 Dockerfile 및 이미지 생성 ###
 
+![image](https://github.com/xodbs1123/Docker/assets/61976898/eaa0633a-8e50-461d-9402-c90a6f5a3b2a)
+
+
+```
+C:\docker\sidecar> docker image build -t cloner:1.0 .
+```
+
 ### 깃 허브 레포지터리 생성 ###
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/0cebf282-efce-440a-89b7-dba7caeaf5f8)
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/ac48eb3d-756f-4dd9-ab82-9703a8c87dbc)
+
+### 첫번째 컨테이너 실행 ###
+- git clone 후 1분 단위로 git pull
+```
+
+```
+### 두번째 컨테이너(nginx) 실행 ###
+- 서비스 포트 매핑 필요 (호스트와 컨테이너의 서비스 포트를 동일하게 설정)
+
+### 브라우저로 접속해서 1분 간격으로 깃 허브에 바뀐 내용이 서비스 것 확인
+
+## 도커 컨테이너 네트워크 ##
+### 네트워크 목록 조회 ###
+```
+c:\docker\sidecar>docker network ls
+NETWORK ID     NAME      DRIVER    SCOPE
+019e7d43edf5   bridge    bridge    local  => 하나의 호스트 내에서 여러 컨테이너들이 서로 소통할 수 있는 네트워크
+db15ca27f2df   host      host      local  => 호스트와 동일한 네트워크에서 컨테이너를 구동하기 위한 네트워크
+00ebb1fdfad5   none      null      local
+                         overlay          => 여러 호스트에 분산되어 돌아가는 컨테이너 간에 네트워킹을 위한 네트워크     
+```
+
+### 컨테이너가 사용하고 있는 네트워크를 확인 ###
+```
+C:\docker> docker container run -d --name my-todo-app myanjini/react-todo-app:v1
+
+C:\docker> docker container ls
+CONTAINER ID   IMAGE                        COMMAND                   CREATED          STATUS          PORTS     NAMES
+a22f136c6a8e   myanjini/react-todo-app:v1   "/docker-entrypoint.…"   11 seconds ago   Up 10 seconds   80/tcp    my-todo-app
+
+
+C:\docker> docker container inspect my-todo-app
+
+ "Networks": {
+                "bridge": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "NetworkID": "5c25d796d992bffa6e8579fb619fd2a842bc548fabcd970ed9577d6b5584b19f",
+                    "EndpointID": "96cfbd0708e764f0102685a6e5afbb0883c6a9ed6369a5543b816e42bce3aeba",
+                    "Gateway": "172.17.0.1",
+                    "IPAddress": "172.17.0.2",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "MacAddress": "02:42:ac:11:00:02",
+                    "DriverOpts": null
+                }
+            }
+
+```
+
+### 네트워크 생성 ###
+```
+c:\docker> docker network create --driver=bridge web-network
+                                  ~~~~~~~~~~~~~~ ~~~~~~~~~~
+                                        종류        이름 
+dd2f7322393becdf504316b2584b7a3e401512f5cde6688181e1712662aa0113
+
+C:\docker> docker network ls
+NETWORK ID     NAME          DRIVER    SCOPE
+5c25d796d992   bridge        bridge    local
+130572d1fc8e   host          host      local
+a8c80154400c   none          null      local
+801a911174a2   web-network   bridge    local
+```
+
+### 네트워크에 연결/연결 해제 ###
+```
+c:\docker>docker network connect web-network my-todo-app
+
+C:\docker> docker container inspect my-todo-app
+
+            "Networks": {
+                "bridge": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "NetworkID": "5c25d796d992bffa6e8579fb619fd2a842bc548fabcd970ed9577d6b5584b19f",
+                    "EndpointID": "96cfbd0708e764f0102685a6e5afbb0883c6a9ed6369a5543b816e42bce3aeba",
+                    "Gateway": "172.17.0.1",
+                    "IPAddress": "172.17.0.2",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "MacAddress": "02:42:ac:11:00:02",
+                    "DriverOpts": null
+                },
+                "web-network": {
+                    "IPAMConfig": {},
+                    "Links": null,
+                    "Aliases": [
+                        "a22f136c6a8e"
+                    ],
+                    "NetworkID": "801a911174a2db358c0ccf569c66c8eeba5d0aa16f6a4c37e11a15f258d2fc35",
+                    "EndpointID": "dae66c06e8d35c97f999925b493f1474f4416ce5e3a03e1f21ff295a0a2f34af",
+                    "Gateway": "172.18.0.1",
+                    "IPAddress": "172.18.0.2",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "MacAddress": "02:42:ac:12:00:02",
+                    "DriverOpts": {}
+                }
+            }
+        }
+```
+
+### 네트워크 상세 정보 확인 ###
+```
+c:\docker>docker network inspect web-network
+[
+    {
+        "Name": "web-network",
+        "Id": "dd2f7322393becdf504316b2584b7a3e401512f5cde6688181e1712662aa0113",
+        "Created": "2023-09-26T07:03:31.522218964Z",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": {},
+            "Config": [
+                {
+                    "Subnet": "172.18.0.0/16",
+                    "Gateway": "172.18.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": {
+            "55fdc4092148388714dc16c8c4180a6b712ee65d425b13d052bff14f94ca03d0": {
+                "Name": "my-todo-app",
+                "EndpointID": "ef2aa4bdf7c311793faab65fbed5ddf66c095ae53b027694caae0d97657c20fb",
+                "MacAddress": "02:42:ac:12:00:02",
+                "IPv4Address": "172.18.0.2/16",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {},
+        "Labels": {}
+    }
+]
+```
+
+### 네트워크 삭제 ###
+- 사용중인 네트워크는 삭제 불가
+
+```
+c:\docker>docker network rm web-network
+Error response from daemon: error while removing network: network web-network id dd2f7322393becdf504316b2584b7a3e401512f5cde6688181e1712662aa0113 has active endpoints
+```
+
+- 네트워크와 컨테이너를 분리후에 삭제
+```
+c:\docker>docker network disconnect web-network my-todo-app
+
+c:\docker>docker network rm web-network
+web-network
+
+c:\docker>docker network ls
+NETWORK ID     NAME      DRIVER    SCOPE
+019e7d43edf5   bridge    bridge    local
+db15ca27f2df   host      host      local
+00ebb1fdfad5   none      null      local
+```
+
+### 컨테이너 시작할 때 사용할 네트워크 지정 ###
+- 네트워크 생성
+```
+c:\docker>docker network create --driver=bridge mybridgenetwork
+617c3d299e72af484b82b847b2ab0ab07b58ec9cc88d60619f3649531dab2d98
+```
+
+```
+c:\docker>docker container run -d -p 80 --name my-todo-app-2 --net=mybridgenetwork myanjini/react-todo-app:v1
+ddb79fe84233adb90744f4c419315013b54287a9c72bd7244f7e5a46d4a0530c
+```
+
+```
+c:\docker>docker container inspect my-todo-app-2
+
+ "Networks": {
+                "mybridgenetwork": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": [
+                        "ddb79fe84233"
+                    ],
+                    "NetworkID": "617c3d299e72af484b82b847b2ab0ab07b58ec9cc88d60619f3649531dab2d98",
+                    "EndpointID": "89eb0ecd6a2bad0bdc5ea88e13f91b1e4955a05be5eb432f5ea040eeea3595c1",
+                    "Gateway": "172.19.0.1",
+                    "IPAddress": "172.19.0.2",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "MacAddress": "02:42:ac:13:00:02",
+                    "DriverOpts": null
+                }
+            }
+        }
+    }
+]
+```
+
+### Centos 이미지를 이용해서 mycentos 이름의 컨테이너 실행 ###
+```
+c:\docker>docker container run -itd --name mycentos centos
+```
+
+- 2개의 컨테이너 추가 실행
+```
+C:\docker> docker container run -d -p 80:80 --name my-todo-app myanjini/react-todo-app:v1
+9ab6a5bb35ebc4e80aff6b53761f6ff614e4f1ca203735cdfc65de94e6a861e7
+
+C:\docker> docker container run -d -p 80 --name my-todo-app-2 --net=mybridgenetwork myanjini/react-todo-app:v1
+d9f5e238e05a00c0659bb3c5583e13da24e008c08fb9d6dcb64b0686187831b7
+```
+
+### 각 컨테이너가 사용하고 있는 네트워크 확인 ###
+- my-todo-app 컨테이너와 mycentos 컨테이너는 동일 네트워크(172.17 네트워크)를 사용
+```
+C:\docker> docker container inspect my-todo-app    <= "172.17.0.3" / bridge
+C:\docker> docker container inspect my-todo-app-2  <= 172.19.0.2" / mybridgeneetworks
+C:\docker> docker container inspect mycentos       <= "172.17.0.2" / bridge
+```
+
+- 파워쉘에서 포맷팅된 출력으로 확인 가능
+```
+PS C:\Users\User> docker container inspect -f '{{range .NetworkSettings.Networks}}{{println .IPAddress}}{{println .NetworkID}}{{end}}' mycentos
+
+172.17.0.2
+019e7d43edf511ae75dd955fa7ce7a5ddf98f3ba20f12d688b6d46957a6593ae
+```
+
+### mycentos 컨테이너에서 다른 컨테이너와 접속 여부 확인 ###
+- my-todo-app에 연결
+```
+c:\docker>docker container exec mycentos ping 172.17.0.3
+PING 172.17.0.3 (172.17.0.3) 56(84) bytes of data.
+64 bytes from 172.17.0.3: icmp_seq=1 ttl=64 time=0.233 ms
+64 bytes from 172.17.0.3: icmp_seq=2 ttl=64 time=0.094 ms
+64 bytes from 172.17.0.3: icmp_seq=3 ttl=64 time=0.090 ms
+```
+
+- my-todo-app-2에 연결 (다른 네트워크 대역이라 연결 불가)
+```
+c:\docker>docker container exec mycentos ping 172.19.0.2
+^C
+c:\docker>
+```
+
+### mycentos 컨테이너를 my-todo-app-2 컨테이너가 연결되어있는 mybridgenetworks로 연결 ###
+```
+c:\docker>docker network connect mybridgenetwork mycentos
+```
+- my-todo-app-2에 ping 확인
+```
+c:\docker>docker container exec mycentos ping 172.19.0.2
+PING 172.19.0.2 (172.19.0.2) 56(84) bytes of data.
+64 bytes from 172.19.0.2: icmp_seq=1 ttl=64 time=0.089 ms
+64 bytes from 172.19.0.2: icmp_seq=2 ttl=64 time=0.101 ms
+64 bytes from 172.19.0.2: icmp_seq=3 ttl=64 time=0.098 ms
+64 bytes from 172.19.0.2: icmp_seq=4 ttl=64 time=0.093 ms
+```
+- my-todo-app에 ping 확인
+```
+c:\docker>docker container exec mycentos ping 172.17.0.3
+PING 172.17.0.3 (172.17.0.3) 56(84) bytes of data.
+64 bytes from 172.17.0.3: icmp_seq=1 ttl=64 time=0.073 ms
+64 bytes from 172.17.0.3: icmp_seq=2 ttl=64 time=0.097 ms
+64 bytes from 172.17.0.3: icmp_seq=3 ttl=64 time=0.097 ms
+```
+
+- 두 개의 네트워크 대역에 연결 되어있는 것을 확인할 수 있음
