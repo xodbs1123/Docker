@@ -77,7 +77,7 @@ docker.io/library/ubuntu:latest
 ```
 
 ### 이미지에 레지스트리 정보를 태깅 ###
-```
+```linux
 c:\docker>docker image tag ubuntu localhost:5000/myubuntu
 
 c:\docker>docker image ls
