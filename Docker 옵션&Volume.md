@@ -434,8 +434,7 @@ done
 
 ### 첫번째 컨테이너 Dockerfile 및 이미지 생성 ###
 
-![image](https://github.com/xodbs1123/Docker/assets/61976898/eaa0633a-8e50-461d-9402-c90a6f5a3b2a)
-
+![image](https://github.com/xodbs1123/Docker/assets/61976898/5290d0e7-295c-44e6-ac3e-6df4900f71dd)
 
 ```
 C:\docker\sidecar> docker image build -t cloner:1.0 .
@@ -450,12 +449,34 @@ C:\docker\sidecar> docker image build -t cloner:1.0 .
 ### 첫번째 컨테이너 실행 ###
 - git clone 후 1분 단위로 git pull
 ```
+c:\docker\sidecar>docker container run -d -v myvolume:/data --name clonercontainer cloner:1.0
+309daf7b6db96f21d61fb45a9ab028fdeb4c1b8fef79febdb9ffc4c58788ad89
 
+c:\docker\sidecar>docker container logs clonercontainer
+Cloning into '/data'...
+Tue Sep 26 07:39:43 UTC 2023
+Already up to date.
+Tue Sep 26 07:40:44 UTC 2023
+Already up to date.
 ```
+
 ### 두번째 컨테이너(nginx) 실행 ###
 - 서비스 포트 매핑 필요 (호스트와 컨테이너의 서비스 포트를 동일하게 설정)
-
+```
+c:\docker\sidecar>docker container run -d -v myvolume:/usr/share/nginx/html -p 80:80 --name nginx nginx
+Unable to find image 'nginx:latest' locally
+```
 ### 브라우저로 접속해서 1분 간격으로 깃 허브에 바뀐 내용이 서비스 것 확인
+- github index.html 수정 전
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/146056c9-96d2-46d9-bcdf-d994beba4be7)
+
+- github index.html 수정 후
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/7f9b803e-3c5f-438f-bee4-7ca8d5843542)
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/46f6d701-7e05-48d6-8af5-56b9197b7bda)
+
 
 ## 도커 컨테이너 네트워크 ##
 ### 네트워크 목록 조회 ###
@@ -729,5 +750,4 @@ PING 172.17.0.3 (172.17.0.3) 56(84) bytes of data.
 64 bytes from 172.17.0.3: icmp_seq=2 ttl=64 time=0.097 ms
 64 bytes from 172.17.0.3: icmp_seq=3 ttl=64 time=0.097 ms
 ```
-
-- 두 개의 네트워크 대역에 연결 되어있는 것을 확인할 수 있음
+=> 두 개의 네트워크 대역에 연결 되어있는 것을 확인할 수 있음
