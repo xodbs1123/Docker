@@ -147,6 +147,11 @@ registry
 - 호스트의 파일 시스템 대신 메모리에 저장하는 방식
 - non-persistent data를 다룰 때는 tmpfs mount가 가장 좋음
 
+### -v 또는 --mount 옵션 ###
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/d82ec00b-e4a7-4625-98fe-29b35dfceb50)
+
+
 ## 볼륨 예시 ##
 
 ### 볼륨 생성 ###
@@ -350,3 +355,83 @@ hello
 HELLO2
 ```
 
+## 접근 통제 volume 생성 ##
+```
+c:\docker>docker container run -itd -v testvolume:/temp/ --name rwcontainer ubuntu
+Unable to find image 'ubuntu:latest' locally
+latest: Pulling from library/ubuntu
+445a6a12be2b: Already exists
+Digest: sha256:aabed3296a3d45cede1dc866a24476c4d7e093aa806263c27ddaadbdce3c1054
+Status: Downloaded newer image for ubuntu:latest
+f5d36449f60df239d754218b59884cf3f6087589f9e69a154be117f2b7c31676
+
+
+c:\docker>docker container run -itd -v testvolume:/temp/:ro --name rocontainer ubuntu
+c6b0c4d71e1908941ff552bad75971cceaf847e5741aad2fae16cd913aa4aa1b
+```
+
+- rwcontainer에서 /temp/hello.txt 생성 및 읽기 가능
+```
+c:\docker>docker container exec -it rwcontainer /bin/bash
+root@f5d36449f60d:/# echo hello >> /temp/hello.txt
+root@f5d36449f60d:/# cat /temp/hello.txt
+Hello
+
+```
+
+- rocontainer은 읽기만 가능 (쓰기 불가)
+```
+c:\docker>docker container exec -it rocontainer /bin/bash
+root@c6b0c4d71e19:/# echo hi > /temp/hi.txt
+bash: /temp/hi.txt: Read-only file system
+
+root@c6b0c4d71e19:/# ls /temp/
+hello.txt
+
+root@c6b0c4d71e19:/# cat /temp/hello.txt
+hello
+```
+
+## 실습 ##
+- 두 개의 컨테이너로 구성된 어플리케이션 개발
+- 첫번째 컨테이너는 주기적으로 github에서 컨텐츠(html)을 다운로드하는 쉘 스크립트가 동작
+  - 깃 허브 주소는 외부에서 컨테이너를 실행할 환경 변수로 전달 받아서 사용
+- 두번째 컨테이너는 nginx 서버가 동작
+
+### c:\docker\sidecar 생성 ###
+```
+C:\docker> mkdir sidecar
+
+C:\docker> cd sidecar
+
+C:\docker\sidecar>
+```
+
+### cloner 파일 작성 ###
+- 깃 허브로부터 60초 단위로 컨텐츠를 가져오는 쉘 스크립트
+```bash
+#!/bin/bash
+
+# GITHUB_URL 환경변수가 설정되어 있는지 확인
+
+# 설정되지 않은 경우 에러 종료
+if [ -z $GITHUB_URL ] ; then
+  exit 1
+fi
+
+# 처음 git clone을 통해서 컨텐츠를 가져옮
+git clone $GITHUB_URL /data
+
+# 이후 60초 마다 git hub에서 컨텐츠를 가져옮
+cd /data
+while tre
+do
+  date
+  sleep 60
+  git pull
+done
+```
+
+### 첫번째 컨테이너 Dockerfile 및 이미지 생성 ###
+
+### 깃 허브 레포지터리 생성 ###
