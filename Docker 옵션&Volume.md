@@ -125,9 +125,19 @@ registry
 ![image](https://github.com/xodbs1123/Docker/assets/61976898/290426ca-6288-42cd-abdb-510ea2b66e83)
 
 ### Volume ###
-- 호스트의 파일 시스탬 내애 특정 영역(리눅스의 경우, /var/lib/docker/volumes/)을 도커가 사용, 관리
-- 도커가 아닌 다른 프로세스에서는 해당 영역에 접근 불가능
-- 가장 추천하는 방식
+- Docker 컨테이너에서 생성되고 사용되는 데이터를 유지하기 위한 메커니즘
+- Docker에서 완전히 관리
+- 호스트의 파일 시스템 내에 특정 영역(리눅스의 경우, /var/lib/docker/volumes/)을 도커가 사용, 관리
+- 도커가 아닌 다른 프로세스에서는 해당 영역 접근이 불가능 
+- 장점
+  - 볼륨은 바인드 마운트보다 백업 또는 마이그레이션이 더 용이
+  - Docker CLI 명령 또는 Docker API를 사용하여 볼륨 관리 가능
+  - 볼륨은 Linux 및 Windows 컨테이너 모두에서 작동
+  - 여러 컨테이너 간에 볼륨을 더욱 안전하게 공유
+  - 볼륨 드라이버를 사용하면 원격 호스트 또는 클라우드 공급자에 볼륨을 저장하고, 볼륨 내용을 암호화하거나 다른 기능을 추가하는 것이 가능
+  - 새 볼륨에는 컨테이너에 의해 콘텐츠가 미리 채워질 수 있음
+  - Docker Desktop의 볼륨은 Mac 및 Windows 호스트의 바인드 마운트보다 성능이 훨씬 높음
+
 
 ### bind mount ##
 - 호스트 파일 시스템 자체를 사용
@@ -137,7 +147,93 @@ registry
 - 호스트의 파일 시스템 대신 메모리에 저장하는 방식
 - non-persistent data를 다룰 때는 tmpfs mount가 가장 좋음
 
-### 호스트 볼륨 공유 예시 ###
+## 볼륨 예시 ##
+
+### 볼륨 생성 ###
+```
+c:\docker>docker volume create myvolume
+myvolume
+
+c:\docker>docker volume ls
+DRIVER    VOLUME NAME
+local     myvolume
+```
+
+- \\wsl.localhost\docker-desktop-data\data\docker\volumes 에서 확인 가능
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/746a0618-4bc4-4f82-a5d9-7fd13b88e2f7)
+
+### 생성한 볼륨을 사용하는 컨테이너 실행 ###
+```
+c:\docker>docker container run -it --name myvolumecontainer -v myvolume:/temp/ ubuntu
+
+root@1b65df9ed843:/#
+```
+
+- 파일 만든 후 컨테이너 빠져나옴
+```
+c:\docker>docker container run -it --name myvolumecontainer -v myvolume:/temp/ ubuntu
+root@1b65df9ed843:/# echo hello, volume >> /temp/hello_volume
+```
+
+### 동일 볼륨을 사용하는 컨테이너 추가 실행 ###
+```
+c:\docker>docker container run -it --name ourvolumecontainer -v myvolume:/temp/ ubuntu
+
+root@d8768f87586c:/#
+
+root@d8768f87586c:/# ls /temp/      <= 위에서 생성한 파일이 존재(공유) 함
+hello_volume
+root@d8768f87586c:/# cat /temp/hello_volume
+hello, volume
+root@d8768f87586c:/#
+```
+
+### volume 세부 정보 확인 (inspect) ###
+```
+c:\docker>docker inspect --type volume myvolume      
+[
+    {
+        "CreatedAt": "2023-09-26T02:26:15Z",
+        "Driver": "local",
+        "Labels": null,
+        "Mountpoint": "/var/lib/docker/volumes/myvolume/_data",
+        "Name": "myvolume",
+        "Options": null,
+        "Scope": "local"
+    }
+]
+
+c:\docker>docker volume inspect myvolume
+[
+    {
+        "CreatedAt": "2023-09-26T02:26:15Z",
+        "Driver": "local",
+        "Labels": null,
+        "Mountpoint": "/var/lib/docker/volumes/myvolume/_data",
+        "Name": "myvolume",
+        "Options": null,
+        "Scope": "local"
+    }
+]
+```
+
+### 도커 컨테이너 실행 시 볼륨 옵션을 주면 자동으로 볼륨 생성 ###
+```
+C:\docker> docker container run -it --name myvolumecontainer -v newvolume:/root/ ubuntu
+root@a8012617075d:/# echo Hello, Volume >> /root/hello_volume
+root@a8012617075d:/# exit
+exit
+
+C:\docker> docker container run -it --name ourvolumecontainer -v newvolume:/temp/ ubuntu
+root@314028d04a4c:/# ls /temp/
+hello_volume
+root@314028d04a4c:/# cat /temp/hello_volume
+Hello, Volume
+root@314028d04a4c:/#
+```
+
+### Bind Mount 공유 예시 ###
 - MySQL 이미지를 이용한 데이터베이스 컨테이너 실행
 ```
 c:\docker>docker container run -d ^
@@ -164,7 +260,7 @@ CONTAINER ID   IMAGE        COMMAND                   CREATED             STATUS
 ae39f66eba6d   mysql:5.7    "docker-entrypoint.s…"   9 minutes ago       Up 9 minutes       3306/tcp, 33060/tcp      wordpressdb_hostvolume
 ```
 
-- 호스트 볼륨을 확인
+- Bind Mount 확인
 ```
 c:\docker>dir .\mysql_data
  C 드라이브의 볼륨에는 이름이 없습니다.
@@ -252,4 +348,5 @@ HELLO
 c:\docker>type hello2
 hello
 HELLO2
-``` 
+```
+
