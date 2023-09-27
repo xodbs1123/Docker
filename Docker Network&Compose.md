@@ -63,7 +63,7 @@ PING cent-networka-b (172.18.0.3) 56(84) bytes of data.
 
 
 ## 링크 ##
-### 컨테이너 생성 ###
+### 기본 네트워크를 사용하는 컨테이너에 --link 옵션을 사용해서 실행 ###
 ```
 C:\docker>docker container run -itd --name cent-default-c --link cent-default-a:cent-a centos
 97c2597d0b18dce039a928be972b27c094c4be88e856549ad18bbd285636857d
@@ -264,3 +264,95 @@ mysql> select * from wp_users;
 +----+------------+------------------------------------+---------------+------------------+------------------------+---------------------+---------------------+-------------+--------------+
 1 row in set (0.00 sec)
 ```
+
+### wordpressdb 컨테이너 중지시 wordpress 컨테이너 동작을 확인 ###
+```
+C:\docker>docker container stop wordpressdb
+wordpressdb
+```
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/bd005c9a-f402-4005-ad02-5945dd0a263d)
+
+### wordpress 컨테이너 재시작 후 wordpress 컨테이너 동작 확인 ###
+```
+C:\docker>docker container start wordpressdb
+wordpressdb
+```
+![image](https://github.com/xodbs1123/Docker/assets/61976898/d6d3d87a-abee-4f57-b6ff-7b3526c0aad6)
+
+
+### wordpressdb 컨테이너를 삭제하고 다시 실행했을 때 wordpress 컨테이너의 동작을 확인 ###
+```
+C:\docker>docker container rm -f wordpressdb
+wordpressdb
+```
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/bd005c9a-f402-4005-ad02-5945dd0a263d)
+
+### wpordpressdb 컨테이너 다시 생성 및 실행 ###
+```
+C:\docker>docker container run -d --name wordpressdb -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=wordpress mysql:5.7
+85e62d2e33624d67a0cf590ceb40994a55fcae57867a003cae0849e2f9e8f9f2
+```
+
+- mysql 컨테이너가 삭제되면서 컨테이너의 데이터도 함께 삭제됨
+![image](https://github.com/xodbs1123/Docker/assets/61976898/a89706b9-8ba9-414e-b080-bfd161544237)
+
+### 컨테이너의 데이터를 영속적(Persistent)인 데이터로 활용하는 방법 ###
+**- 컨테이너 데이터를 저장할 디렉터리 생성**
+```
+C:\docker>mkdir wordpressdb_data
+```
+
+**- -v 옵션을 추가해서 wordpressdb 컨테이너 실행**
+```
+C:\docker>docker container run -d --name wordpressdb -v c:\docker\wordpressdb_data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=wordpress mysql:5.7
+787514da9f49ec1e1ccc18029f743239fa393c83278e4335752f581457b058f7
+```
+**- wordpressdb 컨테이너에서 mysql 서비스를 시작하며 생성한 파일들**
+```
+C:\docker>dir .\wordpressdb_data
+ C 드라이브의 볼륨에는 이름이 없습니다.
+ 볼륨 일련 번호: D0A5-3978
+
+ C:\docker\wordpressdb_data 디렉터리
+
+2023-09-27  오전 10:43    <DIR>          .
+2023-09-27  오전 10:43    <DIR>          ..
+2023-09-27  오전 10:43                56 auto.cnf
+2023-09-27  오전 10:43             1,680 ca-key.pem
+2023-09-27  오전 10:43             1,112 ca.pem
+2023-09-27  오전 10:43             1,112 client-cert.pem
+2023-09-27  오전 10:43             1,680 client-key.pem
+2023-09-27  오전 10:43        79,691,776 ibdata1
+2023-09-27  오전 10:43        12,582,912 ibtmp1
+2023-09-27  오전 10:43             1,318 ib_buffer_pool
+2023-09-27  오전 10:43        50,331,648 ib_logfile0
+2023-09-27  오전 10:43        50,331,648 ib_logfile1
+2023-09-27  오전 10:43    <DIR>          mysql
+2023-09-27  오전 10:43    <JUNCTION>     mysql.sock [...]
+2023-09-27  오전 10:43    <DIR>          performance_schema
+2023-09-27  오전 10:43             1,676 private_key.pem
+2023-09-27  오전 10:43               452 public_key.pem
+2023-09-27  오전 10:43             1,112 server-cert.pem
+2023-09-27  오전 10:43             1,676 server-key.pem
+2023-09-27  오전 10:43    <DIR>          sys
+2023-09-27  오전 10:43    <DIR>          wordpress
+              15개 파일         192,949,858 바이트
+               6개 디렉터리  60,716,171,264 바이트 남음
+```
+
+### 브라우저로 wordpress 컨테이너로 접속해서 설정을 진행 ###
+- data 입력 후 wordpress 설치
+
+### wordpresssdb 컨테이너를 삭제 후 재시작해서 wordpress 서비스 확인 ###
+```
+C:\docker>docker container rm -f wordpressdb
+wordpressdb
+
+C:\docker>docker container run -d --name wordpressdb -v c:\docker\wordpressdb_data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=wordpress mysql:5.7
+1c14c4eb4a3bdf187d85bf654dd82e394972ca861af9e87451f16cc86be9ab1a
+```
+
+**- 데이터가 유지됨**
+![image](https://github.com/xodbs1123/Docker/assets/61976898/ae75156c-e3b0-4343-9e2e-fb4301ead53b)
