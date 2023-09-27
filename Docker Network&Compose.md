@@ -356,3 +356,156 @@ C:\docker>docker container run -d --name wordpressdb -v c:\docker\wordpressdb_da
 
 **- 데이터가 유지됨**
 ![image](https://github.com/xodbs1123/Docker/assets/61976898/ae75156c-e3b0-4343-9e2e-fb4301ead53b)
+
+## Docker Compose ##
+https://docs.docker.com/compose/
+
+```
+Compose is a tool for defining and running multi-container Docker applications. With Compose, you use a YAML file to configure your application's services. Then, with a single command, you create and start all the services from your configuration.
+```
+### docker-compose.yaml (dcoker-compose.yml) 파일 구조 ###
+- Docker Compose를 사용하여 여러 도커 컨테이너를 정의하고 관리하는 데 사용되는 설정 파일- 
+- YAML(YAML Ain't Markup Language) 형식으로 작성
+- 여러 서비스, 네트워크, 볼륨 및 환경 변수와 같은 컨테이너 관련 설정을 지정
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/a83b90fa-bad8-4663-9c61-b17291a03ebe)
+
+- version   => docker-compose 파일의 구문 버전을 정의
+- services  => 컨테이너 서비스 정의 ,서비스 이름과 해당 서비스에 대한 설정 정의, 각 서비스는 독립적인 컨테이너로 실행
+ - 컨테이너 이미지를 빌드하는 방법
+ - 레지스트리에서 도커 이미지를 사용하는 방법
+- networks  => 서비스에서 사용할 네트워크에 대한 설명
+- volume    => 서비스의 컨테이너에서 마운트될 데이터 볼륨에 대한 설명
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/8120d360-6c18-48ac-b703-a3d6fc9165c6)
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/b667f8cd-a4d1-4e7a-b075-57e8ceefee5f)
+
+### mysql wordpress 애플리케이션을 docker-compose.yaml 파일로 정의 ###
+**- docker-compose 디렉터리**
+```
+C:\docker>mkdir docker-compose
+
+C:\docker>cd docker-compose
+
+C:\docker\docker-compose>
+```
+
+**- vscode에 docker-compose.yaml 생성후 작성**
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/5e60d3be-23ec-4838-9764-f909b4262eba)
+
+
+**- 컨테이너 실행**
+
+```
+C:\docker\docker-compose> docker-compose up		⇐ attach 모드로 실행 
+							   → 별도의 명령 프롬프트를 실행해서 제어해야 함
+```
+
+**- 별도의 명령 프롬프트를 실행해서 컨테이너 실행을 확인**
+```
+C:\Users\myanj> docker container ls
+CONTAINER ID   IMAGE       COMMAND                   CREATED              STATUS              PORTS                   NAMES
+52a9c1206509   wordpress   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:65101->80/tcp   docker-compose-wordpress-1
+ff29b65f4642   mysql:5.7   "docker-entrypoint.s…"   About a minute ago   Up About a minute   3306/tcp, 33060/tcp     docker-compose-wordpressdb-1
+9f2d6cafbc09   mysql:5.7   "docker-entrypoint.s…"   About an hour ago    Up About an hour    3306/tcp, 33060/tcp     wordpressdb
+a5b34d0fd822   wordpress   "docker-entrypoint.s…"   About an hour ago    Up About an hour    0.0.0.0:64561->80/tcp   wordpress
+```
+**- docker-compose-down**
+```
+c:\docker\docker-compose> docker-compose down
+[+] Running 3/3
+ ✔ Container docker-compose-wordpress-1    Removed                  1.4s
+ ✔ Container docker-compose-wordpressdb-1  Removed                  1.9s
+ ✔ Network docker-compose_default          Removed                  0.7s
+
+c:\docker\docker-compose> docker container ls 			⇐ docker-compose를 이용해서 실행한 컨테이너가 모두 삭제
+CONTAINER ID   IMAGE       COMMAND                   CREATED             STATUS             PORTS                   NAMES
+9f2d6cafbc09   mysql:5.7   "docker-entrypoint.s…"   About an hour ago   Up About an hour   3306/tcp, 33060/tcp     wordpressdb
+a5b34d0fd822   wordpress   "docker-entrypoint.s…"   2 hours ago         Up 2 hours         0.0.0.0:64561->80/tcp   wordpress
+```
+
+**- detach 모드로 컨테이너 실행**
+```
+C:\docker\docker-compose>docker-compose down
+[+] Running 1/1
+[+] Running 1/2ocker-compose-wordpress-1    Removed                                                                                               1.5s
+[+] Running 1/2ocker-compose-wordpress-1    Removed                                                                                               1.5s
+[+] Running 1/2ocker-compose-wordpress-1    Removed                                                                                               1.5s
+[+] Running 1/2ocker-compose-wordpress-1    Removed                                                                                               1.5s
+[+] Running 1/2ocker-compose-wordpress-1    Removed                                                                                               1.5s
+[+] Running 1/2ocker-compose-wordpress-1    Removed                                                                                               1.5s
+```
+```
+C:\docker\docker-compose>docker-compose ls
+NAME                STATUS              CONFIG FILES
+docker-compose      running(2)          C:\docker\docker-compose\docker-compose.yaml
+```
+
+**- docker-compse-wordpress-1 컨테이너의 서비스 포트로 접속**
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/9579b662-887f-4c6c-bd8a-2ea22d20e603)
+
+**- docker-compose에서 여러 서비스 실행**
+```
+C:\docker\docker-compose>docker-compose up -d --scale wordpress=3
+[+] Running 5/1
+ ✔ Network docker-compose_default          Created                                                                                               0.9s
+ ✔ Container docker-compose-wordpressdb-1  Created                                                                                               0.0s
+```
+```
+C:\docker\docker-compose>docker container ls
+
+CONTAINER ID   IMAGE       COMMAND                   CREATED              STATUS              PORTS                   NAMES
+30e95fc99a6c   wordpress   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:54607->80/tcp   docker-compose-wordpress-1
+9c8383495a41   wordpress   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:54608->80/tcp   docker-compose-wordpress-3
+292585a9dee3   wordpress   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:54609->80/tcp   docker-compose-wordpress-2
+```
+
+**- 한 포트에서 워드프레스 설치하면 다른 포트의 워드프레스는 설치 필요 없음 (volume으로 매핑되어 있기 때문에)**
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/794a1e7c-f7ee-4e81-b1b9-325a4ddfbe2f)
+
+**- scale 10개로 확장시 기존 컨테이너 이외에 7개가 새로 추가됨** 
+```
+C:\docker\docker-compose> docker-compose up -d --scale wordpress=10
+ ✔ Container docker-compose-wordpressdb-1  Running                                                          0.0s
+ ✔ Container docker-compose-wordpress-3    Running                                                          0.0s
+ ✔ Container docker-compose-wordpress-2    Running                                                          0.0s
+ ✔ Container docker-compose-wordpress-1    Running                                                          0.0s
+ ✔ Container docker-compose-wordpress-4    Started                                                          0.1s
+ ✔ Container docker-compose-wordpress-10   Started                                                          0.1s
+ ✔ Container docker-compose-wordpress-8    Started                                                          0.1s
+ ✔ Container docker-compose-wordpress-6    Started                                                          0.1s
+ ✔ Container docker-compose-wordpress-7    Started                                                          0.1s
+ ✔ Container docker-compose-wordpress-9    Started                                                          0.1s
+ ✔ Container docker-compose-wordpress-5    Started                                                          0.1s
+```
+```
+
+C:\docker\docker-compose> docker container ls
+CONTAINER ID   IMAGE       COMMAND                   CREATED              STATUS              PORTS                   NAMES
+ce1ddbc0b611   wordpress   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:65276->80/tcp   docker-compose-wordpress-10
+aa9c14e9af2f   wordpress   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:65277->80/tcp   docker-compose-wordpress-7
+8d7b5eb93264   wordpress   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:65278->80/tcp   docker-compose-wordpress-5
+88921a235734   wordpress   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:65279->80/tcp   docker-compose-wordpress-9
+cfc346c308dd   wordpress   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:65280->80/tcp   docker-compose-wordpress-8
+f83d1a002af8   wordpress   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:65281->80/tcp   docker-compose-wordpress-6
+b2ac823eb867   wordpress   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:65282->80/tcp   docker-compose-wordpress-4
+78d136c04c4a   wordpress   "docker-entrypoint.s…"   7 minutes ago        Up 7 minutes        0.0.0.0:65188->80/tcp   docker-compose-wordpress-3
+d8000fbd46bc   wordpress   "docker-entrypoint.s…"   7 minutes ago        Up 7 minutes        0.0.0.0:65189->80/tcp   docker-compose-wordpress-2
+e8e765a84010   wordpress   "docker-entrypoint.s…"   7 minutes ago        Up 7 minutes        0.0.0.0:65190->80/tcp   docker-compose-wordpress-1
+86f185080fc4   mysql:5.7   "docker-entrypoint.s…"   7 minutes ago        Up 7 minutes        3306/tcp, 33060/tcp     docker-compose-wordpressdb-1
+```
+
+**- scale 10개에서 5개로 변경하면 자동으로 컨테이너 갯수가 줄어듦**
+```
+C:\docker\docker-compose> docker-compose up -d --scale wordpress=5
+ ✔ Container docker-compose-wordpressdb-1  Running                                                          0.0s
+ ✔ Container docker-compose-wordpress-3    Running                                                          0.0s
+ ✔ Container docker-compose-wordpress-2    Running                                                          0.0s
+ ✔ Container docker-compose-wordpress-1    Running                                                          0.0s
+ ✔ Container docker-compose-wordpress-7    Running                                                          0.0s
+ ✔ Container docker-compose-wordpress-5    Running                                                          0.0s
+```
