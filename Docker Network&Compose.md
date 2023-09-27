@@ -509,3 +509,309 @@ C:\docker\docker-compose> docker-compose up -d --scale wordpress=5
  ✔ Container docker-compose-wordpress-7    Running                                                          0.0s
  ✔ Container docker-compose-wordpress-5    Running                                                          0.0s
 ```
+
+### nginx를 이용해서 로드밸런싱 기능 추가 ###
+**- nginx.conf 파일 생성 및 작성**
+
+```
+events {
+    worker_connections 1000;
+}
+
+
+http {
+    upstream all {
+        server wordpress:80;
+    }
+
+
+    server {
+        listen 80;
+        location / {
+            proxy_pass http://all/;
+        }
+    }
+}
+```
+
+**- dokcker-compose 파일 수정**
+
+```yaml
+
+version: "3.3"
+services:
+  wordpressdb:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=wordpress
+    volumes:
+      - wordpressdb_data:/var/lib/mysql
+  wordpress:
+    depends_on:
+      - wordpressdb
+    image: wordpress
+    ports:
+      - 80
+    environment:
+      WORDPRESS_DB_HOST: wordpressdb:3306
+      WORDPRESSDB_NAME: wordpress
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: password
+
+  nginx:
+    depends_on:
+      - wordpress
+    image: nginx
+    volumes:
+      - .\nginx.conf:/etc/nginx/nginx.conf
+    restart: always
+    ports:
+      - "80:80"      
+
+volumes:
+  wordpressdb_data: {}
+```
+
+**- 컨테이너 종료 및 실행**
+```
+C:\docker\docker-compose> docker-compose down
+[+] Running 6/6
+ ✔ Container docker-compose-nginx-1        Removed                      0.6s
+ ✔ Container docker-compose-wordpress-3    Removed                      2.5s
+ ✔ Container docker-compose-wordpress-1    Removed                      1.7s
+ ✔ Container docker-compose-wordpress-2    Removed                      1.9s
+ ✔ Container docker-compose-wordpressdb-1  Removed                      2.2s
+ ✔ Network docker-compose_default          Removed                      0.7s
+
+C:\docker\docker-compose> docker-compose up -d --scale wordpress=3
+[+] Running 6/6
+ ✔ Network docker-compose_default          Created                      0.8s
+ ✔ Container docker-compose-wordpressdb-1  Started                      0.0s
+ ✔ Container docker-compose-wordpress-1    Started                      0.0s
+ ✔ Container docker-compose-wordpress-2    Started                      0.1s
+ ✔ Container docker-compose-wordpress-3    Started                      0.0s
+ ✔ Container docker-compose-nginx-1        Started                      0.1s
+
+```
+
+```
+C:\docker\docker-compose>docker container ls
+CONTAINER ID   IMAGE       COMMAND                   CREATED          STATUS          PORTS                   NAMES
+0083776efac0   nginx       "/docker-entrypoint.…"   50 seconds ago   Up 44 seconds   0.0.0.0:80->80/tcp      docker-compose-nginx-1
+66f65038182b   wordpress   "docker-entrypoint.s…"   50 seconds ago   Up 47 seconds   0.0.0.0:54943->80/tcp   docker-compose-wordpress-1
+4b382dca0f6c   wordpress   "docker-entrypoint.s…"   50 seconds ago   Up 46 seconds   0.0.0.0:54944->80/tcp   docker-compose-wordpress-2
+8f04f39f44e5   wordpress   "docker-entrypoint.s…"   50 seconds ago   Up 45 seconds   0.0.0.0:54945->80/tcp   docker-compose-wordpress-3
+c335f94fb5d1   mysql:5.7   "docker-entrypoint.s…"   50 seconds ago   Up 48 seconds   3306/tcp, 33060/tcp     docker-compose-wordpressdb-1
+```
+
+## Flask App Dockerize ##
+### 작업 디렉토리 생성 ###
+```
+C:\docker>mkdir flask
+
+C:\docker>cd flask
+```
+
+### 가상환경 설치 ###
+```
+C:\docker\docker-compose> cd ..
+
+C:\docker> mkdir flask
+
+C:\docker> cd flask
+
+C:\docker\flask>
+
+C:\docker\flask> pip install virtualenv
+
+C:\docker\flask> virtualenv venv
+
+C:\docker\flask> venv\Scripts\activate
+
+(venv) C:\docker\flask> pip install Flask
+```
+**- C:\docker\flask\app.py**
+```python
+from flask import Flask
+app = Flask(__name__)
+
+
+@app.route("/")
+def hello():
+    return "<h1>Hello Docker & Flask</h1>"
+
+
+if __name__ == "__main__":
+    app.run()
+```
+
+- **app.py 실행**
+```
+(venv) C:\docker\flask>python app.py
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5000
+Press CTRL+C to quit
+127.0.0.1 - - [27/Sep/2023 14:29:16] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [27/Sep/2023 14:29:16] "GET /favicon.ico HTTP/1.1" 404 -
+```
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/196236b0-62b2-4d97-9edd-08a73c8be8c9)
+
+
+**- 실행시 host 주소를 명시하여 외부에서 접근 가능하도록함**
+```
+(venv) C:\docker\flask>python -m flask run --host=0.0.0.0
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.20.132.178:5000
+Press CTRL+C to quit
+```
+
+**- requirements.txt 를 통해 필요 설치 파일 명시**
+```
+(venv) C:\docker\flask>pip freeze > requirements.txt
+
+(venv) C:\docker\flask>typ requirements.txt
+
+(venv) C:\docker\flask>type requirements.txt
+blinker==1.6.2
+click==8.1.7
+colorama==0.4.6
+Flask==2.3.3
+itsdangerous==2.1.2
+Jinja2==3.1.2
+MarkupSafe==2.1.3
+Werkzeug==2.3.7
+```
+
+### Dockerfile 작성 ###
+```
+FROM python
+WORKDIR /myapp
+COPY . .
+RUN pip3 install -r requirements.txt
+CMD ["python3", "-m", "flask", "run", "--host=0.0.0.0"]
+```
+
+### 이미지 빌드 및 컨테이너 실행 ###
+```
+(venv) C:\docker\flask>docker image build -t myflask:1.0 .
+[+] Building 8.2s (10/10) FINISHED
+
+
+(venv) C:\docker\flask>docker container run -d -p 8888:5000 --rm --name myflask myflask:1.0
+3d398d06cb8353ca081c6025d42aeeca63992406f9b44fe9543b4fb218800888
+
+(venv) C:\docker\flask>docker container ls
+CONTAINER ID   IMAGE         COMMAND                   CREATED          STATUS          PORTS                    NAMES
+3d398d06cb83   myflask:1.0   "python3 -m flask ru…"   30 seconds ago   Up 29 seconds   0.0.0.0:8888->5000/tcp   myflask
+```
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/8596bc69-5581-4d0a-a9f4-e2e4d710b867)
+
+
+## 실습 ##
+- /whoareyou 접속하면 현재 서버의 주소를 출력하도록 소스 코드를 수정한 후 도커 이미지로 빌드
+- 이미지를 Docker Compose를 이용해서 동일한 컨테이너를 여러 개 실행 후 http://lcalhost/whoareyou로 접속했을 때 컨테이너의 주소가 라운드로빈되어서 출력하는 것을 확인해보자
+
+### app.py 수정 ###
+```
+from flask import Flask, request
+import socket
+
+
+app = Flask(__name__)
+
+
+
+
+@app.route("/")
+def hello():
+    return "<h1>Hello Docker & Flask</h1><h1>"
+
+
+@app.route("/whoareyou")
+def whoareyou():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip = s.getsockname()[0]
+    s.close()
+
+
+    return "<h1>"+ip+"</h1>"
+
+
+if __name__ == "__main__":
+    app.run()
+```
+### 이미지 빌드 ###
+```
+(venv) C:\docker\flask>docker image build -t myflask:1.0 .
+```
+
+### 컨테이너 실행 ###
+```
+C:\docker\flask>docker container run -d -p 8080:5000 --rm --name myflask myflask:1.0
+```
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/5130ee2a-230f-4cde-87de-c954d7bed0ac)
+
+### nginx.conf 파일 작성 ###
+```
+events {
+    worker_connections 1000;
+}
+
+
+http {
+    upstream all {
+        server myflask:5000;
+    }
+
+
+    server {
+        listen 80;
+        location / {
+            proxy_pass http://all/;
+        }
+    }
+}
+```
+### docker-compose.yaml 파일 작성 ###
+
+```
+version: "3.3"
+services:
+  myflask:
+    image: myflask:1.0
+    ports:
+      - 5000
+  nginx:
+    depends_on:
+      - myflask
+    image: nginx
+    volumes:
+      - .\nginx.conf:/etc/nginx/nginx.conf
+    restart: always
+    ports:
+      - "80:80"      
+```
+
+### 컨테이너 실행 ###
+```
+(venv) C:\docker\flask> docker-compose up -d --scale myflask=3
+
+(venv) C:\docker\flask> docker container ls
+CONTAINER ID   IMAGE         COMMAND                   CREATED          STATUS          PORTS                     NAMES
+310bd19df90d   nginx         "/docker-entrypoint.…"   9 seconds ago    Up 5 seconds    0.0.0.0:80->80/tcp        flask-nginx-1
+42012006be37   myflask:2.0   "python3 -m flask ru…"   9 seconds ago    Up 8 seconds    0.0.0.0:55912->5000/tcp   flask-myflask-1
+dc9bd109bde9   myflask:2.0   "python3 -m flask ru…"   9 seconds ago    Up 7 seconds    0.0.0.0:55914->5000/tcp   flask-myflask-3
+1c3ae40320eb   myflask:2.0   "python3 -m flask ru…"   9 seconds ago    Up 6 seconds    0.0.0.0:55915->5000/tcp   flask-myflask-2
+```
+
+![image](https://github.com/xodbs1123/Docker/assets/61976898/0bf7a0fe-f337-4926-89a3-03d344ea95fe)
