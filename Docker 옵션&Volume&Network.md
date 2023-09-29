@@ -424,7 +424,7 @@ git clone $GITHUB_URL /data
 
 # 이후 60초 마다 git hub에서 컨텐츠를 가져옮
 cd /data
-while tre
+while true
 do
   date
   sleep 60
