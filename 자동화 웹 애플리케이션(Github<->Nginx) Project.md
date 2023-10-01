@@ -278,4 +278,4 @@ CONTAINER ID   IMAGE           COMMAND                   CREATED         STATUS 
 ![image](https://github.com/xodbs1123/Docker/assets/61976898/a6b796d9-b229-45f6-a521-737a2128c4bc)
 
 - 버튼 클릭시 docker.html 파일로 이동
-![image](https://github.com/xodbs1123/Docker/assets/61976898/b6b4a687-2a96-4dd9-87c1-6f8f461b31df)
+![image](https://github.com/xodbs1123/Docker/assets/61976898/f4c0eace-de48-4716-b707-7da68d019466)
