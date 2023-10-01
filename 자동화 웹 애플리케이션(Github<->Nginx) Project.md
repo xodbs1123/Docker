@@ -243,3 +243,39 @@ Unable to find image 'nginx:latest' locally
 
 
 ### Docker Compose 작성 ###
+```dockerfile
+version: '3.3'
+services:
+  myproject: 
+    image: myproject:1.0
+    volumes:
+      - myvolume:/data
+  
+  nginx:
+    image: nginx
+    ports:
+      - 80:80
+    volumes:
+      - myvolume:/usr/share/nginx/html
+
+volumes:
+  myvolume: {}
+```
+
+- 컨테이너 실행 및 확인
+```
+C:\docker\myproject>Docker-compose up -d
+
+C:\docker\myproject>docker container ls
+CONTAINER ID   IMAGE           COMMAND                   CREATED         STATUS         PORTS                NAMES
+446a08b8c913   nginx           "/docker-entrypoint.…"   8 seconds ago   Up 5 seconds   0.0.0.0:80->80/tcp   myproject-nginx-1
+7681f68e3d91   myproject:1.0   "/myapp/cloner"           8 seconds ago   Up 6 seconds                        myproject-myproject-1
+```
+
+### 브라우저 정상 작동 확인 ###
+
+- 기본 페이지
+![image](https://github.com/xodbs1123/Docker/assets/61976898/a6b796d9-b229-45f6-a521-737a2128c4bc)
+
+- 버튼 클릭시 docker.html 파일로 이동
+![image](https://github.com/xodbs1123/Docker/assets/61976898/b6b4a687-2a96-4dd9-87c1-6f8f461b31df)
