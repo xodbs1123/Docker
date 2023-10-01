@@ -5,7 +5,7 @@
 - 두번째 컨테이너는 nginx 서버가 동작
 - 두 컨테이너를 Compose하여 실행
 
-### github 저장소에 html 파일 작성 ###
+### github sidecar 레파지토리에 html 파일 작성 ###
 ![image](https://github.com/xodbs1123/Docker/assets/61976898/f6a9af1c-6c43-48fc-b504-2146464ba59c)
 
 - **index.html**
